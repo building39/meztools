@@ -1,0 +1,141 @@
+#!/usr/bin/env python
+'''
+Created on Sep 25, 2013
+
+@author: mmartin
+'''
+
+import getopt
+import getpass
+import sys
+
+from CDMIExports import CDMIExports
+
+STORAGEROOT = '/cdmi/storage_root'
+VERSION = '1.0.0'
+
+verbose = False
+
+class ProcessObjects(object):
+    '''
+    Make up some spiffy comments that indicate our intentions.
+    '''
+    def __init__(self,
+                 commit=False,
+                 host='localhost',
+                 passwd=None,
+                 port=80,
+                 userid='administrator',
+                 verbose=False):
+        if host.startswith('https://'):
+            pass
+        elif host.startswith('http://'):
+            pass
+        else:
+            host = '%s%s' % ('http://', host)
+        if port:
+            host = '%s:%d' % (host, port)
+        self.host = host
+        self.indent = 0
+        self.num_files = 0
+        self.num_containers = 0
+        self.num_objects = 0
+        self.num_unknowns = 0
+        self.passwd = passwd
+        self.port = port
+        self.userid = userid
+        self.verbose = verbose
+
+    def process_objects(self):
+        '''
+        Main driver.
+        '''
+
+
+def usage():
+    '''
+    Usage instructions.
+    '''
+    print ('Just a lil ol code template.')
+    print ('Version : %s' % VERSION)
+    print ('')
+    print ('Usage: '
+           '%s <options>' % sys.argv[0])
+    print ('')
+    print (' Command Line options:')
+    print ('  --commit    - Commit all changes. Default is nocommit.')
+    print ('  --help      - Print this enlightening message')
+    print ('  --host      - MCSP host url. Defaults to "localhost".')
+    print ('  --nocommit  - Dry run - do not commit changes. This is default behavior.')
+    print ('  --passwd    - MCSP userid password. If omitted, will be'
+           '                prompted for.')
+    print ('  --port      - Port to communicate on. Default is 80 for http, 443 for https.')
+    print ('  --userid    - MCSP userid. Defaults to "administrator".')
+    print ('  --verbose   - Print progress information.')
+    print ('')
+
+    sys.exit(0)
+
+def main(argv):
+    '''
+    Main entry point
+    '''
+    if (len(argv) < 2):
+        usage()
+    commit = False
+    host = 'localhost'
+    passwd = None
+    port = None
+    userid = 'administrator'
+    global verbose
+    verbose = False
+
+    try:
+        opts, _args = getopt.getopt(argv,
+                                   '',
+                                   ['help',
+                                    'commit',
+                                    'host=',
+                                    'nocommit',
+                                    'passwd=',
+                                    'port=',
+                                    'userid=',
+                                    'verbose'])
+    except getopt.GetoptError, e:
+        print ('opt error %s' % e)
+        print ('')
+        usage()
+
+    for opt, arg in opts:
+        if opt in ("-h", "--help"):
+            usage()
+        elif opt == '--commit':
+            commit = True
+        elif opt == '--host':
+            host = arg
+        elif opt == '--nocommit':
+            commit = False
+        elif opt == '--passwd':
+            passwd = arg
+        elif opt == '--port':
+            port = int(arg)
+        elif opt == '--userid':
+            userid = arg
+        elif opt == '--verbose':
+            verbose = True
+            
+    if port is None:
+        port = 443 if host.startswith('https://') else 80
+
+    if passwd is None:
+        passwd = getpass.getpass()
+
+    pobj = ProcessObjects(commit=commit,
+                          host=host,
+                          passwd=passwd,
+                          port=port,
+                          userid=userid,
+                          verbose=verbose)
+
+if __name__ == '__main__':
+    main(sys.argv[1:])
